@@ -2,68 +2,53 @@ package com.opengm.view
 
 import javafx.scene.control.TreeItem
 import javafx.scene.image.Image
-import javafx.scene.paint.Color
 import javafx.stage.StageStyle
 import tornadofx.*
 
 
+
 class MainView: View() {
+
+
+    fun loadResources() : MutableMap<String, List<String>> {
+        val resources = mutableMapOf<String, List<String>>()
+        resources["Images"] = listOf("Ball", "Wall", "Paddle")
+        resources["Sounds"] = listOf("Music", "Boing")
+        resources["Backgrounds"] = listOf("Background")
+        resources["Functions"] = listOf("RestartGame", "GameOver", "NextLevel", "Pause")
+        resources["Objects"] = listOf("Ball", "Wall", "Paddle", "Controller")
+        resources["Rooms"] = listOf("Intro", "Level1", "Level2", "Level3", "GameOver")
+        return resources
+    }
 
     val drawerView = drawer {
         minWidth = 200.0
 
-        item("Images", expanded = true) {
-            listview(listOf("Ball", "Wall", "Paddle").observable())
-        }
-        item("Sounds") {
-            listview(listOf("Music", "Boing").observable())
-        }
-        item("Background") {
-            listview(listOf("Background").observable())
-        }
-        item("Functions") {
-            listview(listOf("RestartGame", "GameOver", "NextLevel", "Pause").observable())
-        }
-        item("Objects") {
-            listview(listOf("Ball", "Wall", "Paddle", "Controller").observable())
-        }
-        item("Rooms") {
-            listview(listOf("Intro", "Level1", "Level2", "Level3", "GameOver").observable())
-        }
-    }
+        val allResources = loadResources()
 
-    val treeView = treeview<String> {
-        // Create root item
-        root = TreeItem()
-        root.isExpanded = true
+        for (res in allResources) {
+            item(res.key) {
 
-        check(true)
-        // Make sure the text in each TreeItem is the name of the Person
-        cellFormat { text = it }
+                treeview<String> {
+                    // Create root item
+                    root = TreeItem(res.key)
+                    root.isExpanded = true
 
-        // Generate items. Children of the root item will contain departments
-        populate { parent ->
-            if (parent == root) {
-                listOf(
-                        "Images",
-                        "Sounds",
-                        "Background",
-                        "Functions",
-                        "Objects",
-                        "Rooms"
-                )
+                    // Make sure the text in each TreeItem is the name of the Person
+                    cellFormat { text = it }
+
+                    // Generate items. Children of the root item will contain departments
+                    populate { parent ->
+                        if (parent == root) {
+                            res.value as List<String>
+                        } else null
+                    }
+                }
             }
-            else null
-        }
-
-
-
-        setOnMouseClicked { event ->
-            openInternalWindow<MyFragment>(modal = false)
-            println("test")
         }
 
     }
+
 
     override val root = borderpane {
         setMinSize(800.0, 600.0)
@@ -84,26 +69,58 @@ class MainView: View() {
             button { text = "Rooms" }
         }
 
-        bottom = label("BOTTOM") {
-            useMaxWidth = true
-            style {
-                backgroundColor += Color.BLUE
+
+        val allResources = loadResources()
+
+        //left = drawerView
+        left = treeview<String> {
+            // Create root item
+            root = TreeItem("ArkanoidGame")
+            root.isExpanded = true
+
+            // Make sure the text in each TreeItem is the name of the Person
+            cellFormat { text = it }
+
+            // Generate items. Children of the root item will contain departments
+            populate { parent ->
+                if (parent == root) {
+                    allResources.keys
+                } else {
+                    allResources[parent.value]
+                }
             }
+
+            setOnMouseClicked { event ->
+
+                //println(event.target)
+
+            }
+            setOnMouseDragOver { event ->
+
+            }
+            setOnMouseDragEntered {
+                println("entered")
+            }
+            setOnDragOver {
+
+                println("dragiing")
+            }
+            setOnDragDetected { event ->
+                  //println(event.target)
+                println("start drag")
+
+//                /* Put a string on a dragboard */
+//                val content = ClipboardContent()
+//                content.putString(event.source.toString())
+//                db.setContent(content)
+//
+//                event.consume()
+            }
+
+
         }
 
-        left = drawerView
 
-
-
-        right = label("RIGHT") {
-            useMaxWidth = true
-            useMaxHeight = true
-            style {
-                backgroundColor += Color.PURPLE
-            }
-        }
-
-        center = hbox {  }
     }
 }
 
